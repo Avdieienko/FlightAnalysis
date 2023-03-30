@@ -24,80 +24,6 @@ today = datetime.datetime.now()
 f = open("airports.json", encoding="utf8")
 data = json.load(f)
 
-# Start Date of departure
-while True:
-    start_date = input("Start date(YYYY-MM-DD): ")
-    start_date = start_date.replace(" ","")
-    try:
-        datetime.date.fromisoformat(start_date)
-    except ValueError:
-        print("Incorrect date format, it should be YYYY-MM-DD")
-        continue
-    start_date = datetime.datetime.strptime(start_date, "%Y-%m-%d")
-    if start_date<today:
-        print("You cannot choose past date")
-        continue
-    break
-
-# End Date of departure
-while True:
-    end_date = input("End date(YYYY-MM-DD): ")
-    end_date = end_date.replace(" ","")
-    try:
-        datetime.date.fromisoformat(end_date)
-    except ValueError:
-        print("Incorrect date format, it should be YYYY-MM-DD")
-        continue
-    end_date = datetime.datetime.strptime(end_date, "%Y-%m-%d")
-    if end_date<today:
-        print("You cannot choose past date")
-        continue
-    break
-# Choosing departure
-while True:
-    departure = input("\nFrom: ").lower()
-    dest = 0
-    for i in data:
-        if data[i]["city"].lower() == departure:
-            dest+=1
-            print(i + " " + data[i]["name"])
-            departure_f = i
-    if dest>1:
-        departure_f = input("Choose airport: ").upper()
-        if departure_f.upper() not in data:
-            print("No such airport on the list ")
-            continue
-        break
-    elif dest == 0:
-        print("No city was found, try again")
-        continue
-    break
-
-# Choosing destination
-while True:
-    destination = input("\nTo: ").lower()
-    dest = 0
-    for i in data:
-        if data[i]["city"].lower() == destination:
-            dest+=1
-            print(i + " " + data[i]["name"])
-            destination_f = i
-    if dest>1:
-        destination_f = input("Choose airport: ").upper()
-        if destination_f.upper() not in data:
-            print("No such airport on the list ")
-            continue
-        break
-    elif dest == 0:
-        print("No city was found, try again")
-        continue
-    if destination_f == departure_f:
-        print("\nDestination and departure should be unique\n")
-        continue
-    break
-# Close the airport database
-f.close()
-
 
 def eval_route(date, departure_f, destination_f):
     import time
@@ -157,10 +83,10 @@ def eval_route(date, departure_f, destination_f):
         dest_temp.append(duration)
         dest_temp.append(ans)
         dest_temp.append(int(price[1:]))
+        dest_temp.append(date)
         dest_lst.append(dest_temp)
-
     data = pd.DataFrame(dest_lst,
-                        columns=["departure_time", "arrival_time", "from", "to", "duration", "change", "price"])
+                        columns=["departure_time", "arrival_time", "from", "to", "duration", "change", "price","day"])
 
     return data
 
@@ -178,6 +104,78 @@ def eval_prices(file):
     prices = np.array(file.price)
     return np.amin(prices), np.mean(prices), np.amax(prices)
 
+
+# Start Date of departure
+while True:
+    start_date = input("Start date(YYYY-MM-DD): ")
+    start_date = start_date.replace(" ","")
+    try:
+        datetime.date.fromisoformat(start_date)
+    except ValueError:
+        print("Incorrect date format, it should be YYYY-MM-DD")
+        continue
+    start_date = datetime.datetime.strptime(start_date, "%Y-%m-%d")
+    if start_date<today:
+        print("You cannot choose past date")
+        continue
+    break
+# End Date of departure
+while True:
+    end_date = input("End date(YYYY-MM-DD): ")
+    end_date = end_date.replace(" ","")
+    try:
+        datetime.date.fromisoformat(end_date)
+    except ValueError:
+        print("Incorrect date format, it should be YYYY-MM-DD")
+        continue
+    end_date = datetime.datetime.strptime(end_date, "%Y-%m-%d")
+    if end_date<today:
+        print("You cannot choose past date")
+        continue
+    break
+# Choosing departure
+while True:
+    departure = input("\nFrom: ").lower()
+    dest = 0
+    for i in data:
+        if data[i]["city"].lower() == departure:
+            dest+=1
+            print(i + " " + data[i]["name"])
+            departure_f = i
+    if dest>1:
+        departure_f = input("Choose airport: ").upper()
+        if departure_f.upper() not in data:
+            print("No such airport on the list ")
+            continue
+        break
+    elif dest == 0:
+        print("No city was found, try again")
+        continue
+    break
+# Choosing destination
+while True:
+    destination = input("\nTo: ").lower()
+    dest = 0
+    for i in data:
+        if data[i]["city"].lower() == destination:
+            dest+=1
+            print(i + " " + data[i]["name"])
+            destination_f = i
+    if dest>1:
+        destination_f = input("Choose airport: ").upper()
+        if destination_f.upper() not in data:
+            print("No such airport on the list ")
+            continue
+        break
+    elif dest == 0:
+        print("No city was found, try again")
+        continue
+    if destination_f == departure_f:
+        print("\nDestination and departure should be unique\n")
+        continue
+    break
+# Close the airport database
+f.close()
 
 print("\nLoading...\n")
 # Create figure
@@ -201,6 +199,7 @@ for single_date in daterange(start_date, end_date):
 
 
 result = pd.concat(df)
+print(result)
 fig.autofmt_xdate()
 plt.ylabel("Price/£")
 plt.legend(["Minimum", "Mean", "Maximum"], loc="upper right")
